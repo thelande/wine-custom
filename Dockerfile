@@ -94,6 +94,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Upgrade base packages
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    --mount=type=bind,from=builder,source=/mnt,target=/builder/mnt \
     set -eux; \
     dpkg --add-architecture i386; \
     apt-get update; \
