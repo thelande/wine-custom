@@ -94,21 +94,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Upgrade base packages
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    # Include dummy bind mount from builder stage to force docker buildx to
+    # build that stage.
     --mount=type=bind,from=builder,source=/mnt,target=/builder/mnt \
     set -eux; \
     dpkg --add-architecture i386; \
     apt-get update; \
     apt-get upgrade -y; \
-    apt-get autoclean
-
-# Install distro-version of wine to get runtime dependencies, then uninstall
-# just wine.
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    set -eux; \
-    apt-get update; \
-    apt-get install -y --install-recommends wine; \
-    apt-get remove -y wine wine64 wine32; \
     apt-get autoclean
 
 # Build and install our custom wine
@@ -136,6 +128,16 @@ RUN --mount=type=cache,target=/usr/src/wine/wine-source \
         gcc-mingw-w64 \
         libc6-dev \
         libc6-dev:i386
+
+# Install distro-version of wine to get runtime dependencies, then uninstall
+# just wine.
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -eux; \
+    apt-get update; \
+    apt-get install -y --install-recommends wine; \
+    apt-get remove -y wine wine64 wine32; \
+    apt-get autoclean
 
 # Install winetricks
 RUN	set -eux; \
